@@ -452,7 +452,7 @@
     if (!visiblePlaces.length) return;
     const bounds = L.latLngBounds(visiblePlaces.map((place) => [place.lat, place.lng]));
     if (animate) {
-      map.flyToBounds(bounds, { padding: [48, 48], maxZoom: 15, duration: .8 });
+      map.flyToBounds(bounds, { padding: [76, 64], maxZoom: 15, duration: .8 });
     } else {
       map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
     }
@@ -750,6 +750,7 @@
     dom.filterToggle.addEventListener("click", () => {
       const open = dom.filterPanel.classList.toggle("open");
       dom.filterToggle.setAttribute("aria-expanded", String(open));
+      if (open) document.querySelector("#meetPanel").hidden = true;
     });
 
     document.addEventListener("keydown", (event) => {
@@ -796,7 +797,13 @@
     addInput();
 
     document.querySelector("#meetAdd").addEventListener("click", () => addInput(true));
-    document.querySelector("#meetToggle").addEventListener("click", () => { panel.hidden = !panel.hidden; });
+    document.querySelector("#meetToggle").addEventListener("click", () => {
+      panel.hidden = !panel.hidden;
+      if (!panel.hidden) {
+        dom.filterPanel.classList.remove("open");
+        dom.filterToggle.setAttribute("aria-expanded", "false");
+      }
+    });
     document.querySelector("#meetClose").addEventListener("click", () => { panel.hidden = true; });
 
     function findStation(nameRaw) {
