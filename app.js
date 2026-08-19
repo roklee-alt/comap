@@ -200,7 +200,7 @@
 
   function detailHtml(place) {
     const accounts = (place.source_accounts || []).map((account) => `@${escapeHtml(account)}`).join(" · ");
-    const tags = (place.categories || []).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
+    const tags = (place.categories || []).slice(0, 3).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
     const sources = (place.mentions || []).slice(0, 8).map((mention) => `
       <a href="${escapeHtml(mention.post_url)}" target="_blank" rel="noopener">
         <span>@${escapeHtml(mention.source_username)}</span>
@@ -208,27 +208,24 @@
         ${mention.is_ad ? '<b>AD</b>' : ''}
         <i aria-hidden="true">↗</i>
       </a>`).join("");
-    const adMessage = place.ad_recommendation_count
-      ? `<p class="popup-ad">광고 표기 추천 ${formatNumber(place.ad_recommendation_count)}건 포함</p>`
-      : "";
     const distance = state.userLocation ? distanceLabel(userDistance(place)) : "";
+    const adSignal = place.ad_recommendation_count
+      ? `<span class="sig-ad">AD 광고 고지 ${formatNumber(place.ad_recommendation_count)}건</span>`
+      : `<span>광고 고지 미확인</span>`;
+    const crossBadge = place.account_count > 1 ? ` <span class="detail-cross">×${place.account_count}</span>` : "";
     return `
       <div class="place-detail">
         <button type="button" class="detail-back" id="detailBack">← 목록으로</button>
         <p class="popup-kicker">${accounts || "comap archive"}</p>
-        <h2>${escapeHtml(place.name)}</h2>
-        <p class="popup-address">${escapeHtml(place.address || place.area_hint || "주소 확인 중")}${distance ? ` · <b class="detail-distance">${distance}</b>` : ""}</p>
-        <div class="popup-stats">
-          <div><strong>${formatNumber(place.recommendation_count)}</strong><span>추천 게시물</span></div>
-          <div><strong>${formatNumber(place.account_count)}</strong><span>추천 계정</span></div>
+        <h2>${escapeHtml(place.name)}${crossBadge}</h2>
+        <p class="popup-address">${escapeHtml(place.address || place.area_hint || "주소 확인 중")}</p>
+        <div class="signal-row">
+          <span class="sig-strong">추천 ${formatNumber(place.recommendation_count)}회</span>
+          <span>계정 ${formatNumber(place.account_count)}</span>
+          ${distance ? `<span class="sig-distance">${distance}</span>` : ""}
+          ${tags}
+          ${adSignal}
         </div>
-        <div class="popup-tags">${tags}</div>
-        ${adMessage}
-        <div class="popup-sources">
-          <p>추천 출처</p>
-          ${sources}
-        </div>
-        <a class="detail-report" href="mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`[comap] 정보 제보: ${place.name}`)}">잘못된 정보 제보 ↗</a>
         ${isMobile() && place.mentions?.length ? `
         <div class="detail-embed">
           <p>분위기 · 메뉴</p>
@@ -239,8 +236,26 @@
           <a href="${escapeHtml(place.kakao_url)}" target="_blank" rel="noopener">카카오맵</a>
           ${place.kakao_url ? `<a href="${escapeHtml(place.kakao_url)}#menuInfo" target="_blank" rel="noopener">메뉴판</a>` : ""}
         </div>
+        <div class="popup-sources">
+          <p>추천 출처</p>
+          ${sources}
+        </div>
+        <a class="detail-report" href="mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`[comap] 정보 제보: ${place.name}`)}">잘못된 정보 제보 ↗</a>
       </div>`;
   }
+
+  function miniLabelHtml(place) {
+    const cross = place.account_count > 1 ? ` <b>×${place.account_count}</b>` : "";
+    return `<div class="mini-label">${escapeHtml(place.name)}${cross}</div>`;
+  }
+
+  const mobileLabel = L.popup({
+    autoPan: false,
+    closeButton: false,
+    autoClose: true,
+    className: "mini-popup",
+    offset: [0, -22]
+  });
 
   let igEmbedScript = null;
   function processEmbeds() {
@@ -261,11 +276,17 @@
     state.selectedId = id;
     document.querySelector(".sidebar").classList.add("detail-open");
     renderList();
+    if (isMobile()) {
+      const place = places.find((row) => row.id === id);
+      // 열기만 하고 토글하지 않는다 — 잔여 클릭이 와도 라벨이 닫히지 않게
+      if (place) mobileLabel.setLatLng([place.lat, place.lng]).setContent(miniLabelHtml(place)).openOn(map);
+    }
   }
 
   function closeDetail() {
     state.detailId = null;
     document.querySelector(".sidebar").classList.remove("detail-open");
+    map.closePopup(mobileLabel);
     renderList();
   }
 
@@ -396,6 +417,7 @@
   function updateResults() {
     state.detailId = null;
     document.querySelector(".sidebar").classList.remove("detail-open");
+    map.closePopup(mobileLabel);
     visiblePlaces = sortPlaces(places.filter(matchesFilters));
     dom.resultCount.textContent = formatNumber(visiblePlaces.length);
     renderList();

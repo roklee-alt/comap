@@ -206,6 +206,16 @@ button { color: inherit; }
 
 .sidebar.detail-open .sidebar-top { display: none; }
 .place-detail { padding: 16px 18px 24px; }
+.detail-cross { display: inline-block; vertical-align: 3px; margin-left: 5px; padding: 2px 5px; background: var(--ink); color: var(--paper); font: 700 10px/1.1 Pretendard, sans-serif; }
+.signal-row { display: flex; flex-wrap: wrap; gap: 5px; margin: 12px 0 0; }
+.signal-row span { padding: 4px 8px; border: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+.signal-row .sig-strong { border-color: var(--ink); color: var(--ink); font-weight: 700; }
+.signal-row .sig-distance { color: var(--location); font-weight: 700; }
+.signal-row .sig-ad { border-color: var(--danger); background: var(--danger); color: #fff; font-weight: 700; }
+.mini-popup .leaflet-popup-content-wrapper { width: auto; box-shadow: 3px 3px 0 rgba(33, 33, 33, .16); }
+.mini-popup .leaflet-popup-content { width: auto !important; margin: 0 !important; }
+.mini-label { padding: 8px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.mini-label b { margin-left: 5px; padding: 1px 4px; background: var(--ink); color: var(--paper); font-size: 9px; }
 .detail-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; padding: 6px 11px; border: 1px solid var(--ink); background: transparent; cursor: pointer; font-size: 11px; font-weight: 700; }
 .detail-back:hover { color: var(--paper); background: var(--ink); }
 .place-detail h2 { margin: 0 0 6px; font-size: 21px; line-height: 1.3; }
