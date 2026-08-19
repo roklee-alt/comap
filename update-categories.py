@@ -33,8 +33,8 @@ def main():
     renamed = subtagged = nopo = 0
     for p in payload["places"]:
         cats = p.get("categories") or []
-        if "걸스" in cats:
-            cats = ["뷰티" if c == "걸스" else c for c in cats]
+        if "걸스" in cats or "뷰티" in cats:
+            cats = [c for c in cats if c not in ("걸스", "뷰티")]
             renamed += 1
         if "술집" in cats:
             kc = p.get("kakao_category") or ""

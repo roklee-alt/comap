@@ -14,7 +14,6 @@
     "노포·포차": { className: "marker-bar", color: "var(--bar)" },
     "카페": { className: "marker-cafe", color: "var(--cafe)" },
     "독서": { className: "marker-books", color: "var(--books)" },
-    "뷰티": { className: "marker-girls", color: "var(--girls)" },
     "맛집": { className: "marker-food", color: "var(--food)" },
     "쇼핑": { className: "marker-shopping", color: "var(--shopping)" },
     "전시·문화": { className: "marker-culture", color: "var(--culture)" },
@@ -328,7 +327,8 @@
       ].join(" "));
       if (!haystack.includes(normalize(state.query))) return false;
     }
-    if (state.categories.size && !(place.categories || []).some((category) => state.categories.has(category))) return false;
+    // 해시태그식 조합: 선택한 태그를 모두 가진 장소만 (AND)
+    if (state.categories.size && ![...state.categories].every((category) => (place.categories || []).includes(category))) return false;
     if (state.accounts.size && !(place.source_accounts || []).some((account) => state.accounts.has(account))) return false;
     if (state.adMode === "ad" && !(place.ad_recommendation_count > 0)) return false;
     if (state.adMode === "organic" && place.ad_recommendation_count > 0) return false;
