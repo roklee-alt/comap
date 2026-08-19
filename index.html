@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="반복 추천과 광고 고지를 확인하며 취향 장소를 탐색하는 지도, comap" />
+    <title>comap — 취향 장소 아카이브</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23212121'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='sans-serif' font-weight='800' font-size='36' fill='%23ffffff'%3EC%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260819d" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true">C</span>
+        <div>
+          <h1>COMAP</h1>
+          <p>취향 장소 아카이브 · 최근 1년</p>
+        </div>
+      </div>
+      <div class="masthead-meta">
+        <span id="coverageDate">2025.08.18—2026.08.18</span>
+        <a class="contact-link" href="mailto:fhfhfhrod@gmail.com?subject=%5Bcomap%5D%20%EB%AC%B8%EC%9D%98">문의</a>
+        <button id="filterToggle" class="mobile-filter-button" type="button" aria-expanded="false" aria-controls="filterPanel">
+          필터 <span id="activeFilterCount">0</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="장소 탐색 패널">
+        <section class="sidebar-top">
+          <div class="summary-row" aria-label="수집 현황">
+            <div><strong id="placeCount">—</strong><span>장소</span></div>
+            <div><strong id="postCount">—</strong><span>추천</span></div>
+            <div><strong id="crossCount">—</strong><span>교차 추천</span></div>
+          </div>
+
+          <label class="search-box">
+            <span class="sr-only">장소 검색</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+            <input id="searchInput" type="search" placeholder="장소명, 동네, 주소 검색" autocomplete="off" />
+            <kbd>/</kbd>
+          </label>
+
+          <div id="filterPanel" class="filter-panel">
+            <div class="filter-group location-filter">
+              <div class="filter-label"><span>내 주변</span><button id="clearNearby" type="button" disabled>반경 해제</button></div>
+              <div class="location-row">
+                <button id="useMyLocation" class="location-button" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path></svg>
+                  <span>내 위치 찾기</span>
+                </button>
+                <select id="radiusSelect" aria-label="내 위치 반경" disabled>
+                  <option value="">거리 제한 없음</option>
+                  <option value="1">반경 1km</option>
+                  <option value="3" selected>반경 3km</option>
+                  <option value="5">반경 5km</option>
+                  <option value="10">반경 10km</option>
+                  <option value="20">반경 20km</option>
+                </select>
+              </div>
+              <p id="locationStatus" class="location-status" aria-live="polite">위치를 허용하면 가까운 장소부터 볼 수 있어요.</p>
+            </div>
+
+            <div class="filter-group admin-filter">
+              <div class="filter-label"><span>행정구역</span><button id="clearAdmin" type="button">전체</button></div>
+              <div class="admin-selects">
+                <select id="regionSelect" aria-label="시도 선택"><option value="">시·도 전체</option></select>
+                <select id="districtSelect" aria-label="시군구 선택" disabled><option value="">시·군·구 전체</option></select>
+                <select id="localitySelect" aria-label="세부 행정구역 선택" disabled><option value="">세부 지역 전체</option></select>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label"><span>카테고리</span><button id="clearCategories" type="button">초기화</button></div>
+              <div id="categoryFilters" class="filter-chips" aria-label="카테고리 필터"></div>
+            </div>
+
+            <div class="filter-group compact-group">
+              <span class="filter-label">추천 계정</span>
+              <div id="accountFilters" class="filter-chips"></div>
+              <form id="accountAddForm" class="account-add-row">
+                <input id="accountAddInput" type="text" placeholder="@계정 추가" autocomplete="off" aria-label="추천 계정 추가" />
+                <button type="submit">추가</button>
+              </form>
+            </div>
+
+            <div class="segmented" aria-label="광고 필터">
+              <button type="button" data-ad-mode="all" class="active">전체</button>
+              <button type="button" data-ad-mode="organic">광고 없음</button>
+              <button type="button" data-ad-mode="ad">광고 포함</button>
+            </div>
+
+            <label class="toggle-row">
+              <input id="crossAccountOnly" type="checkbox" />
+              <span class="toggle-ui" aria-hidden="true"></span>
+              <span>모든 계정이 추천한 장소만</span>
+            </label>
+            <p class="filter-note">추천 횟수는 서로 다른 게시물 기준 · AD는 원문 광고/협찬 고지 기준</p>
+            <p class="map-source-note">지도 타일: CARTO · OpenStreetMap · 장소 좌표: Kakao Map</p>
+          </div>
+
+          <div class="list-toolbar">
+            <p><strong id="resultCount">0</strong>곳 표시 중</p>
+            <select id="sortSelect" aria-label="정렬 기준">
+              <option value="recommended">중복 추천순</option>
+              <option value="latest">최신 추천순</option>
+              <option value="name">이름순</option>
+              <option id="distanceSortOption" value="distance" disabled>내 위치 거리순</option>
+            </select>
+          </div>
+        </section>
+
+        <section id="placeList" class="place-list" aria-live="polite"></section>
+      </aside>
+
+      <section class="map-stage" aria-label="추천 장소 지도">
+        <div id="map"></div>
+        <div class="map-key" aria-label="지도 범례">
+          <span><i class="pin-key"></i>일반 추천</span>
+          <span><i class="pin-key ad"></i>광고 포함</span>
+          <span><b>×2</b>복수 계정</span>
+          <span id="userLocationKey" hidden><i class="pin-key user"></i>내 위치</span>
+        </div>
+        <button id="fitMap" class="map-action" type="button" title="현재 결과 전체 보기" aria-label="현재 결과 전체 보기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"></path></svg>
+        </button>
+        <button id="mapLocate" class="map-action map-locate" type="button" title="내 위치 표시" aria-label="내 위치 표시">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><circle cx="12" cy="12" r="8"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2"></path></svg>
+        </button>
+      </section>
+    </main>
+
+    <template id="placeCardTemplate">
+      <article class="place-card" tabindex="0">
+        <div class="place-card-top">
+          <div class="category-dot"></div>
+          <div class="place-heading">
+            <h2></h2>
+            <p class="place-address"></p>
+          </div>
+          <span class="account-count"></span>
+        </div>
+        <div class="place-tags"></div>
+        <div class="place-meta">
+          <span class="recommendation-count"></span>
+          <span class="distance-badge"></span>
+          <span class="ad-badge">AD</span>
+          <time></time>
+        </div>
+      </article>
+    </template>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="./data.js?v=20260819d"></script>
+    <script src="./app.js?v=20260819d"></script>
+  </body>
+</html>
