@@ -211,7 +211,7 @@
     const distance = state.userLocation ? distanceLabel(userDistance(place)) : "";
     const adSignal = place.ad_recommendation_count
       ? `<span class="sig-ad">AD 광고 고지 ${formatNumber(place.ad_recommendation_count)}건</span>`
-      : `<span>광고 고지 미확인</span>`;
+      : "";
     const crossBadge = place.account_count > 1 ? ` <span class="detail-cross">×${place.account_count}</span>` : "";
     return `
       <div class="place-detail">
