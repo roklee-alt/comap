@@ -9,6 +9,7 @@ confirmed / suspect_overseas / region_conflict / unknown 으로 분류하고,
 """
 import csv
 import json
+import os
 import re
 import sys
 
@@ -41,6 +42,15 @@ def load_posts(path="source-posts.csv"):
     with open(path, encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
             captions[row["post_url"]] = row.get("caption_first_line") or ""
+    # 전체 캡션 백필(captions-full.csv)이 있으면 첫 줄 대신 전문을 사용
+    if os.path.exists("captions-full.csv"):
+        full = 0
+        with open("captions-full.csv", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                if row.get("status") == "ok" and row.get("caption"):
+                    captions[row["post_url"]] = row["caption"]
+                    full += 1
+        print(f"전체 캡션 사용: {full}건 (나머지는 첫 줄)")
     return captions
 
 

@@ -243,6 +243,8 @@ button { color: inherit; }
 .leaflet-control-attribution { background: rgba(255, 255, 255, .88) !important; font-size: 9px !important; }
 
 .place-marker-wrap { background: transparent; border: 0; }
+/* 터치 영역 확장: 시각 크기(24px)는 그대로, 탭 판정만 44px */
+.place-marker-wrap::after { content: ""; position: absolute; inset: -10px; }
 .place-marker {
   --marker-color: var(--other);
   position: relative;
