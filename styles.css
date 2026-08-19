@@ -363,7 +363,23 @@ button { color: inherit; }
   .sidebar-top { padding: 12px 14px 10px; }
   .summary-row { display: none; }
   .search-box { height: 38px; }
-  .filter-panel { display: none; max-height: 50vh; overflow-y: auto; margin-top: 12px; padding: 12px; border: 1px solid var(--ink); background: var(--paper); position: absolute; z-index: 20; left: 14px; right: 14px; top: 57px; box-shadow: 5px 5px 0 rgba(33, 33, 33, .18); }
+  .filter-panel {
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    left: 14px;
+    right: 14px;
+    top: calc(var(--header-h) + 10px);
+    max-height: calc(100vh - var(--header-h) - 34px);
+    max-height: calc(100dvh - var(--header-h) - 34px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 0;
+    padding: 12px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    box-shadow: 5px 5px 0 rgba(33, 33, 33, .18);
+  }
   .filter-panel.open { display: block; }
   .list-toolbar { margin-top: 10px; padding-top: 9px; }
   .place-card { padding: 13px 14px; }
