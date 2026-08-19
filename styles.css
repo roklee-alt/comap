@@ -232,6 +232,11 @@ button { color: inherit; }
 #meetRun { background: var(--ink); color: var(--paper); }
 #meetAdd:hover { background: var(--paper-deep); }
 .meet-error { margin: 8px 0 0; color: var(--danger); font-size: 11px; }
+.meet-chosen { margin-top: 12px; padding: 10px 12px; border: 1px solid var(--ink); font-size: 12px; line-height: 1.7; }
+.meet-alts { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.meet-alts span { color: var(--muted); font-size: 10px; }
+.meet-alts button { padding: 5px 10px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: 11px; }
+.meet-alts button:hover { border-color: var(--ink); }
 .meet-cand { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--line); }
 .meet-cand-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
 .meet-cand-top span { color: var(--muted); font-size: 11px; }

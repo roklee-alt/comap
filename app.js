@@ -865,16 +865,23 @@
         return;
       }
 
-      top.forEach((row) => {
-        const card = document.createElement("div");
-        card.className = "meet-cand";
-        card.innerHTML = `
-          <div class="meet-cand-top"><strong>${escapeHtml(row.station.n)}</strong><span>놀거리 ${formatNumber(row.count)}곳</span></div>
-          <p>평균 ${row.mean.toFixed(1)}km · 사람 간 차이 ${row.spread.toFixed(1)}km</p>
-          <button type="button">이 동네 장소 보기</button>`;
-        card.querySelector("button").addEventListener("click", () => applyMeetPoint(row.station));
-        results.appendChild(card);
-      });
+      // 후보 목록 대신: 최적 지점으로 바로 이동하고, 핀으로 직접 고르게 한다
+      const [best, ...rest] = top;
+      applyMeetPoint(best.station);
+      results.innerHTML = `<div class="meet-chosen">중간지점: <strong>${escapeHtml(best.station.n)}</strong> · 평균 ${best.mean.toFixed(1)}km · 사람 간 차이 ${best.spread.toFixed(1)}km<br>주변 장소 ${formatNumber(best.count)}곳 — 지도의 핀에서 골라 보세요.</div>`;
+      if (rest.length) {
+        const alt = document.createElement("div");
+        alt.className = "meet-alts";
+        alt.innerHTML = "<span>다른 후보</span>";
+        rest.forEach((row) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = row.station.n;
+          button.addEventListener("click", () => applyMeetPoint(row.station));
+          alt.appendChild(button);
+        });
+        results.appendChild(alt);
+      }
     });
   }
 
