@@ -10,6 +10,12 @@ BAR_SUBTAGS = {
     "이자카야": {"일본식주점", "일식", "일식집", "오뎅바"},
     "맥주·펍": {"호프,요리주점"},
 }
+CAFE_SUBTAGS = {
+    "베이커리·디저트": {"제과,베이커리", "디저트카페"},
+    "핸드드립": {"커피전문점"},
+    "브런치": {"양식", "이탈리안"},
+}
+BOOK_KAKAO = {"서점", "독립서점", "북카페"}
 NOPO_KEYWORDS = ["노포", "포차", "대포집"]
 
 
@@ -36,6 +42,17 @@ def main():
         if "걸스" in cats or "뷰티" in cats:
             cats = [c for c in cats if c not in ("걸스", "뷰티")]
             renamed += 1
+        kc = p.get("kakao_category") or ""
+        # 독서(행위) → 책방·북카페(업태) 개편 + 서점류 흡수
+        if "독서" in cats:
+            cats = ["책방·북카페" if c == "독서" else c for c in cats]
+        if kc in BOOK_KAKAO and "책방·북카페" not in cats:
+            cats.append("책방·북카페")
+        if "카페" in cats:
+            for tag, kinds in CAFE_SUBTAGS.items():
+                if kc in kinds and tag not in cats:
+                    cats.append(tag)
+                    break
         if "술집" in cats:
             kc = p.get("kakao_category") or ""
             for tag, kinds in BAR_SUBTAGS.items():

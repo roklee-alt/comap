@@ -13,7 +13,10 @@
     "맥주·펍": { className: "marker-bar", color: "var(--bar)" },
     "노포·포차": { className: "marker-bar", color: "var(--bar)" },
     "카페": { className: "marker-cafe", color: "var(--cafe)" },
-    "독서": { className: "marker-books", color: "var(--books)" },
+    "베이커리·디저트": { className: "marker-cafe", color: "var(--cafe)" },
+    "핸드드립": { className: "marker-cafe", color: "var(--cafe)" },
+    "브런치": { className: "marker-cafe", color: "var(--cafe)" },
+    "책방·북카페": { className: "marker-books", color: "var(--books)" },
     "맛집": { className: "marker-food", color: "var(--food)" },
     "쇼핑": { className: "marker-shopping", color: "var(--shopping)" },
     "전시·문화": { className: "marker-culture", color: "var(--culture)" },
@@ -445,10 +448,14 @@
     if (scroll) document.querySelector(`.place-card[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  function fitVisible() {
+  function fitVisible(animate = false) {
     if (!visiblePlaces.length) return;
     const bounds = L.latLngBounds(visiblePlaces.map((place) => [place.lat, place.lng]));
-    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
+    if (animate) {
+      map.flyToBounds(bounds, { padding: [48, 48], maxZoom: 15, duration: .8 });
+    } else {
+      map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
+    }
   }
 
   function setSelectOptions(select, placeholder, values, selectedValue = "") {
@@ -656,7 +663,9 @@
       searchTimer = setTimeout(() => {
         state.query = event.target.value.trim();
         updateResults();
-      }, 120);
+        // 지역·이름 검색 시 결과 영역이 화면에 꽉 차게 모션 줌
+        if (state.query && visiblePlaces.length) fitVisible(true);
+      }, 350);
     });
 
     document.querySelectorAll("[data-ad-mode]").forEach((button) => {
@@ -683,7 +692,7 @@
       state.locality = "";
       refreshAdminOptions();
       updateResults();
-      setTimeout(fitVisible, 0);
+      setTimeout(() => fitVisible(true), 0);
     });
 
     dom.districtSelect.addEventListener("change", (event) => {
@@ -691,13 +700,13 @@
       state.locality = "";
       refreshAdminOptions();
       updateResults();
-      setTimeout(fitVisible, 0);
+      setTimeout(() => fitVisible(true), 0);
     });
 
     dom.localitySelect.addEventListener("change", (event) => {
       state.locality = event.target.value;
       updateResults();
-      setTimeout(fitVisible, 0);
+      setTimeout(() => fitVisible(true), 0);
     });
 
     dom.clearAdmin.addEventListener("click", () => {
@@ -706,7 +715,7 @@
       state.locality = "";
       refreshAdminOptions();
       updateResults();
-      setTimeout(fitVisible, 0);
+      setTimeout(() => fitVisible(true), 0);
     });
 
     dom.useMyLocation.addEventListener("click", requestUserLocation);
