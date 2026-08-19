@@ -85,6 +85,8 @@
   map.on("popupopen", () => processEmbeds());
 
   const markers = new Map();
+  const MOBILE_LAYOUT = window.matchMedia("(max-width: 860px)");
+  const isMobile = () => MOBILE_LAYOUT.matches;
   const customAccounts = new Set(JSON.parse(localStorage.getItem("comap_custom_accounts") || "[]"));
   let dataAccountTotal = 0;
   let userMarker = null;
@@ -227,6 +229,11 @@
           ${sources}
         </div>
         <a class="detail-report" href="mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`[comap] 정보 제보: ${place.name}`)}">잘못된 정보 제보 ↗</a>
+        ${isMobile() && place.mentions?.length ? `
+        <div class="detail-embed">
+          <p>분위기 · 메뉴</p>
+          <blockquote class="instagram-media" data-instgrm-permalink="${escapeHtml(place.mentions[0].post_url)}" data-instgrm-version="14"></blockquote>
+        </div>` : ""}
         <div class="popup-links detail-links">
           <a href="${escapeHtml(place.naver_url)}" target="_blank" rel="noopener">네이버지도</a>
           <a href="${escapeHtml(place.kakao_url)}" target="_blank" rel="noopener">카카오맵</a>
@@ -278,7 +285,8 @@
     for (const place of places) {
       if (markers.has(place.id)) continue;
       const marker = L.marker([place.lat, place.lng], { icon: markerIcon(place), title: place.name });
-      marker.bindPopup(popupHtml(place), { maxWidth: 320, offset: L.point(0, -2) });
+      // 모바일: 팝업 autoPan 이동 + 고스트 클릭으로 팝업이 바로 닫히는 문제 → 상세 패널로 일원화
+      if (!isMobile()) marker.bindPopup(popupHtml(place), { maxWidth: 320, offset: L.point(0, -2) });
       marker.on("click", () => openDetail(place.id));
       markers.set(place.id, marker);
     }
