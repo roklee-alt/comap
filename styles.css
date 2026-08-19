@@ -216,6 +216,28 @@ button { color: inherit; }
 .mini-popup .leaflet-popup-content { width: auto !important; margin: 0 !important; }
 .mini-label { padding: 8px 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .mini-label b { margin-left: 5px; padding: 1px 4px; background: var(--ink); color: var(--paper); font-size: 9px; }
+
+.meet-panel { position: fixed; z-index: 1150; top: calc(var(--header-h) + 10px); right: 14px; width: min(360px, calc(100vw - 28px)); max-height: calc(100vh - var(--header-h) - 34px); max-height: calc(100dvh - var(--header-h) - 34px); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px; border: 1px solid var(--ink); background: var(--paper); box-shadow: 5px 5px 0 rgba(33, 33, 33, .18); }
+.meet-panel[hidden] { display: none; }
+.meet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; font-weight: 700; }
+.meet-head button { border: 0; background: transparent; font-size: 20px; line-height: 1; cursor: pointer; color: var(--ink); }
+.meet-note { margin: 0 0 10px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.meet-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.meet-row input { flex: 1; min-width: 0; min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 0; background: var(--white); font-size: 12px; outline: 0; }
+.meet-row input:focus { border-color: var(--ink); }
+.meet-row .meet-remove { width: 34px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.meet-row .meet-remove:hover { color: var(--danger); border-color: var(--danger); }
+.meet-actions { display: flex; gap: 6px; margin-top: 4px; }
+.meet-actions button { flex: 1; min-height: 36px; border: 1px solid var(--ink); background: transparent; cursor: pointer; font-size: 11px; font-weight: 700; }
+#meetRun { background: var(--ink); color: var(--paper); }
+#meetAdd:hover { background: var(--paper-deep); }
+.meet-error { margin: 8px 0 0; color: var(--danger); font-size: 11px; }
+.meet-cand { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--line); }
+.meet-cand-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+.meet-cand-top span { color: var(--muted); font-size: 11px; }
+.meet-cand p { margin: 4px 0 8px; color: var(--muted); font-size: 11px; }
+.meet-cand button { width: 100%; min-height: 32px; border: 1px solid var(--ink); background: transparent; cursor: pointer; font-size: 11px; font-weight: 700; }
+.meet-cand button:hover { background: var(--ink); color: var(--paper); }
 .detail-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; padding: 6px 11px; border: 1px solid var(--ink); background: transparent; cursor: pointer; font-size: 11px; font-weight: 700; }
 .detail-back:hover { color: var(--paper); background: var(--ink); }
 .place-detail h2 { margin: 0 0 6px; font-size: 21px; line-height: 1.3; }

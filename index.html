@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="./styles.css?v=20260819i" />
+    <link rel="stylesheet" href="./styles.css?v=20260819j" />
   </head>
   <body>
     <header class="masthead">
@@ -25,6 +25,7 @@
       </div>
       <div class="masthead-meta">
         <span id="coverageDate">2025.08.18—2026.08.18</span>
+        <button id="meetToggle" class="contact-link meet-button" type="button">중간지점</button>
         <a class="contact-link" href="mailto:fhfhfhrod@gmail.com?subject=%5Bcomap%5D%20%EB%AC%B8%EC%9D%98">문의</a>
         <button id="filterToggle" class="mobile-filter-button" type="button" aria-expanded="false" aria-controls="filterPanel">
           필터 <span id="activeFilterCount">0</span>
@@ -137,6 +138,22 @@
       </section>
     </main>
 
+    <div id="meetPanel" class="meet-panel" hidden>
+      <div class="meet-head">
+        <span>모임 중간지점</span>
+        <button id="meetClose" type="button" aria-label="닫기">×</button>
+      </div>
+      <p class="meet-note">참여자 출발역을 넣으면 모두에게 공평한 지점을 찾아줘요. (2–5명)</p>
+      <div id="meetInputs"></div>
+      <div class="meet-actions">
+        <button id="meetAdd" type="button">+ 출발역 추가</button>
+        <button id="meetRun" type="button">중간지점 찾기</button>
+      </div>
+      <p id="meetError" class="meet-error" hidden></p>
+      <div id="meetResults"></div>
+    </div>
+    <datalist id="stationList"></datalist>
+
     <template id="placeCardTemplate">
       <article class="place-card" tabindex="0">
         <div class="place-card-top">
@@ -159,7 +176,8 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script src="./data.js?v=20260819i"></script>
-    <script src="./app.js?v=20260819i"></script>
+    <script src="./stations.js?v=20260819j"></script>
+    <script src="./data.js?v=20260819j"></script>
+    <script src="./app.js?v=20260819j"></script>
   </body>
 </html>

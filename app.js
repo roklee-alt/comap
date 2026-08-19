@@ -751,6 +751,133 @@
     });
   }
 
+  function initMeetPlanner() {
+    const stations = window.COMAP_STATIONS || [];
+    const panel = document.querySelector("#meetPanel");
+    const inputsBox = document.querySelector("#meetInputs");
+    const results = document.querySelector("#meetResults");
+    const errorEl = document.querySelector("#meetError");
+    const datalist = document.querySelector("#stationList");
+    if (!panel || !stations.length) return;
+
+    stations.forEach((station) => {
+      const option = document.createElement("option");
+      option.value = station.n;
+      datalist.appendChild(option);
+    });
+
+    function addInput(focus = false) {
+      if (inputsBox.children.length >= 5) return;
+      const row = document.createElement("div");
+      row.className = "meet-row";
+      row.innerHTML = `<input type="text" list="stationList" placeholder="출발역 (예: 홍대입구역)" autocomplete="off" />
+        <button type="button" class="meet-remove" aria-label="출발역 빼기">×</button>`;
+      row.querySelector(".meet-remove").addEventListener("click", () => {
+        if (inputsBox.children.length > 2) row.remove();
+        else row.querySelector("input").value = "";
+      });
+      inputsBox.appendChild(row);
+      if (focus) row.querySelector("input").focus();
+    }
+    addInput();
+    addInput();
+
+    document.querySelector("#meetAdd").addEventListener("click", () => addInput(true));
+    document.querySelector("#meetToggle").addEventListener("click", () => { panel.hidden = !panel.hidden; });
+    document.querySelector("#meetClose").addEventListener("click", () => { panel.hidden = true; });
+
+    function findStation(nameRaw) {
+      const name = nameRaw.trim().replace(/\s+/g, "");
+      if (!name) return null;
+      const withSuffix = name.endsWith("역") ? name : name + "역";
+      return stations.find((station) => station.n === withSuffix)
+        || stations.find((station) => station.n.startsWith(name));
+    }
+
+    // 놀거리 점수: 역 반경 1km 안 comap 장소 수 + 반복 추천·교차 추천 가중
+    function richness(station) {
+      let score = 0;
+      let count = 0;
+      for (const place of places) {
+        const d = distanceKm(station, place);
+        if (d <= 1.0) {
+          count += 1;
+          score += 1 + Math.min(place.recommendation_count, 5) * 0.2 + (place.account_count > 1 ? 0.5 : 0);
+        }
+      }
+      return { score, count };
+    }
+
+    function applyMeetPoint(station) {
+      state.userLocation = { lat: station.lat, lng: station.lng, accuracy: null };
+      state.radiusKm = 1;
+      dom.radiusSelect.disabled = false;
+      dom.radiusSelect.value = "1";
+      dom.clearNearby.disabled = false;
+      dom.distanceSortOption.disabled = false;
+      state.sort = "distance";
+      dom.sortSelect.value = "distance";
+      updateResults();
+      updateLocationStatus(`중간지점 기준: ${station.n} · 반경 1km`);
+      mobileLabel.setLatLng([station.lat, station.lng])
+        .setContent(`<div class="mini-label">중간지점 · ${escapeHtml(station.n)}</div>`)
+        .openOn(map);
+      map.flyTo([station.lat, station.lng], 14, { duration: .6 });
+      panel.hidden = true;
+    }
+
+    document.querySelector("#meetRun").addEventListener("click", () => {
+      errorEl.hidden = true;
+      results.textContent = "";
+      const origins = [];
+      const bad = [];
+      inputsBox.querySelectorAll("input").forEach((input) => {
+        if (!input.value.trim()) return;
+        const station = findStation(input.value);
+        station ? origins.push(station) : bad.push(input.value.trim());
+      });
+      if (bad.length) {
+        errorEl.textContent = `못 찾은 역: ${bad.join(", ")} — 목록에서 골라 주세요.`;
+        errorEl.hidden = false;
+        return;
+      }
+      if (origins.length < 2) {
+        errorEl.textContent = "출발역을 2개 이상 넣어 주세요.";
+        errorEl.hidden = false;
+        return;
+      }
+
+      const scored = stations.map((station) => {
+        const ds = origins.map((origin) => distanceKm(origin, station));
+        const mean = ds.reduce((a, b) => a + b, 0) / ds.length;
+        const sd = Math.sqrt(ds.reduce((a, b) => a + (b - mean) ** 2, 0) / ds.length);
+        return { station, mean, fair: mean + sd, spread: Math.max(...ds) - Math.min(...ds) };
+      }).sort((a, b) => a.fair - b.fair);
+
+      // 완벽한 중간보다: 공평함이 크게 손해보지 않는 범위 안에서 놀거리 많은 동네 우선
+      const bestFair = scored[0].fair;
+      const band = scored.filter((row) => row.fair <= bestFair + Math.max(2, bestFair * 0.35)).slice(0, 60);
+      band.forEach((row) => Object.assign(row, richness(row.station)));
+      const top = band.filter((row) => row.count >= 3).sort((a, b) => b.score - a.score).slice(0, 3);
+      if (!top.length) {
+        errorEl.textContent = "추천할 만한 동네를 못 찾았어요. 출발역을 바꿔 보세요.";
+        errorEl.hidden = false;
+        return;
+      }
+
+      top.forEach((row) => {
+        const card = document.createElement("div");
+        card.className = "meet-cand";
+        card.innerHTML = `
+          <div class="meet-cand-top"><strong>${escapeHtml(row.station.n)}</strong><span>놀거리 ${formatNumber(row.count)}곳</span></div>
+          <p>평균 ${row.mean.toFixed(1)}km · 사람 간 차이 ${row.spread.toFixed(1)}km</p>
+          <button type="button">이 동네 장소 보기</button>`;
+        card.querySelector("button").addEventListener("click", () => applyMeetPoint(row.station));
+        results.appendChild(card);
+      });
+    });
+  }
+
   function setSummary() {
     const recommendationCount = new Set(places.flatMap((place) => (place.mentions || []).map((mention) => mention.post_key))).size;
     dom.placeCount.textContent = formatNumber(places.length);
@@ -763,6 +890,7 @@
   buildFilters();
   refreshAdminOptions();
   bindControls();
+  initMeetPlanner();
   setSummary();
   updateLocationStatus();
   updateResults();
