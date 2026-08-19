@@ -8,9 +8,13 @@
 
   const CATEGORY_CONFIG = {
     "술집": { className: "marker-bar", color: "var(--bar)" },
+    "와인·칵테일": { className: "marker-bar", color: "var(--bar)" },
+    "이자카야": { className: "marker-bar", color: "var(--bar)" },
+    "맥주·펍": { className: "marker-bar", color: "var(--bar)" },
+    "노포·포차": { className: "marker-bar", color: "var(--bar)" },
     "카페": { className: "marker-cafe", color: "var(--cafe)" },
     "독서": { className: "marker-books", color: "var(--books)" },
-    "걸스": { className: "marker-girls", color: "var(--girls)" },
+    "뷰티": { className: "marker-girls", color: "var(--girls)" },
     "맛집": { className: "marker-food", color: "var(--food)" },
     "쇼핑": { className: "marker-shopping", color: "var(--shopping)" },
     "전시·문화": { className: "marker-culture", color: "var(--culture)" },
